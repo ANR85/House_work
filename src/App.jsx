@@ -503,9 +503,9 @@ export default function App() {
   const loadAll = useCallback(async (tok) => {
     setLoading(true);
     try {
-      let fams = await supa.get(tok, "families", "select=id");
+let fams = await supa.get(tok, "families", "select=id");
       if (!Array.isArray(fams) || !fams.length) {
-        const created = await supa.post(tok, "families", {});
+        const created = await supa.post(tok, "families", { user_id: (await supa.getUser(tok)).id });
         fams = Array.isArray(created)?created:[created];
       }
       const fid = fams[0].id; setFamilyId(fid);
