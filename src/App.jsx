@@ -500,13 +500,24 @@ export default function App() {
   const handleAuth = (tok) => { sessionStorage.setItem("supa_token", tok); setToken(tok); };
   const handleLogout = async () => { await supa.signOut(token); sessionStorage.removeItem("supa_token"); setToken(""); setFamilyId(null); setChildren([]); };
 
-  const loadAll = useCallback(async (tok) => {
+const loadAll = useCallback(async (tok) => {
     setLoading(true);
     try {
-let fams = await supa.get(tok, "families", "select=id");
+      let fams = await supa.get(tok, "families", "select=id");
       if (!Array.isArray(fams) || !fams.length) {
-        const userRes = await supa.getUser(tok); const uid = userRes?.id || userRes?.user?.id; const created = await supa.post(tok, "families", { user_id: uid });
-        fams = Array.isArray(created)?created:[created];
+        // Tenta criar família com insert direto via REST
+        const res = await fetch(`${SUPA_URL}/rest/v1/families`, {
+          method: "POST",
+          headers: {
+            "apikey": SUPA_KEY,
+            "Authorization": `Bearer ${tok}`,
+            "Content-Type": "application/json",
+            "Prefer": "return=representation"
+          },
+          body: JSON.stringify({})
+        });
+        const created = await res.json();
+        fams = Array.isArray(created) ? created : [created];
       }
       const fid = fams[0].id; setFamilyId(fid);
       const kids = await supa.get(tok, "children", `family_id=eq.${fid}&order=position.asc`);
