@@ -505,7 +505,7 @@ export default function App() {
     try {
 let fams = await supa.get(tok, "families", "select=id");
       if (!Array.isArray(fams) || !fams.length) {
-        const created = await supa.post(tok, "families", { user_id: (await supa.getUser(tok)).id });
+        const userRes = await supa.getUser(tok); const uid = userRes?.id || userRes?.user?.id; const created = await supa.post(tok, "families", { user_id: uid });
         fams = Array.isArray(created)?created:[created];
       }
       const fid = fams[0].id; setFamilyId(fid);
